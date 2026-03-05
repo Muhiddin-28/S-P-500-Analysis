@@ -1,127 +1,313 @@
+# S&P 500 Historical Market Analysis (1871–2023)
 
-# 📊 S&P 500 Historical & Predictive Analysis (1950–2030)
+This project analyzes more than **150 years of S&P 500 historical data** to understand long-term market behavior, valuation cycles, crisis periods, and macroeconomic relationships.
 
-### 🧠 Data Analytics | PostgreSQL | Financial Market Research
+The analysis is performed using **SQL-based financial data exploration** and focuses exclusively on **annual market data** to identify long-term structural patterns rather than short-term volatility.
 
----
-
-## 📘 Project Overview
-This project delivers an in-depth **PostgreSQL-based analysis of the S&P 500 index**, focusing on its **real price, earnings, dividends, inflation, and market cycles** between **1950 and 2023**, followed by a **forecast up to 2030**.
-
-The analysis applies **financial and statistical methods** such as:
-- Year-over-Year growth rate
-- Dividend Yield and Equity Premium Gap
-- Correlation and Linear Regression
-- Inflation comparison
-- Forecast modeling (2024–2030)
+The objective of the project is to demonstrate a **data-driven approach to financial market analysis** and build a reproducible analytical pipeline suitable for data analytics and investment research.
 
 ---
 
-## 🧱 Project Structure
+# Project Structure
 
-| Step | Description | Focus |
-|------|--------------|--------|
-| **1️⃣ Base Data Selection** | Filters and prepares dataset for 1950–2023. | Ensures clean data pipeline |
-| **2️⃣ Yearly Real Growth** | Calculates annual average and YoY growth for real prices. | Market growth patterns |
-| **3️⃣ Equity Premium Gap** | Compares stock yields vs bond interest rates. | Identifies outperforming market phases |
-| **4️⃣ Annual Averages Summary** | Computes yearly averages of price, earnings, dividends, P/E ratio. | Historical performance |
-| **5️⃣ Yearly Growth Rates** | Calculates YoY growth in price, earnings, and dividends. | Annual comparison |
-| **6️⃣ Decade-Wise Summary** | Groups data by decades for trend analysis. | Long-term pattern discovery |
-| **7️⃣ Inflation Impact** | Compares real growth vs CPI inflation. | Detects market cycle phases |
-| **8️⃣ Correlation Analysis** | Analyzes relationships among key metrics. | Statistical dependencies |
-| **9️⃣ Linear Regression** | Builds regression models for prediction. | Statistical modeling |
-| **🔟 Forecasting Model** | Projects 2024–2030 price trends. | Predictive analytics |
+```
+sp500-historical-analysis
 
----
+data/
+    sp500_dataset.csv
+    Raw historical dataset used for the analysis
 
-## 📈 Example: YoY Real Growth
-```sql
-WITH yearly_avg AS (
-    SELECT 
-        EXTRACT(YEAR FROM date) AS year,
-        AVG(real_price) AS avg_real_price
-    FROM sp500
-    WHERE EXTRACT(YEAR FROM date) BETWEEN 1950 AND 2023
-    GROUP BY EXTRACT(YEAR FROM date)
-)
-SELECT 
-    year,
-    ROUND(avg_real_price::numeric, 2) AS avg_real_price,
-    ROUND(
-        ((avg_real_price / LAG(avg_real_price) OVER (ORDER BY year) - 1) * 100)::numeric,
-        2
-    ) AS yoy_real_growth
-FROM yearly_avg
-ORDER BY year;
+sql/
+    sp500_analysis.sql
+    SQL pipeline used to transform and analyze the data
+
+report/
+    sp500_historical_analysis.md
+    Full analytical report with historical insights
+
+README.md
+    Project overview and methodology
 ```
 
-**Purpose:** Evaluates year-over-year real price growth for S&P 500 to identify market expansion or contraction periods.
+---
+
+# Dataset Description
+
+The dataset contains historical S&P 500 market data beginning in **1871** and includes macroeconomic indicators required for long-term market analysis.
+
+Key variables used in the analysis:
+
+| Column               | Description                                          |
+| -------------------- | ---------------------------------------------------- |
+| date                 | observation date                                     |
+| sp500                | S&P 500 index level                                  |
+| dividend             | annual dividend value                                |
+| earnings             | market earnings                                      |
+| consumer_price_index | inflation indicator                                  |
+| long_interest_rate   | long-term government interest rate                   |
+| real_price           | inflation-adjusted price                             |
+| real_dividend        | inflation-adjusted dividend                          |
+| real_earnings        | inflation-adjusted earnings                          |
+| pe10                 | Shiller CAPE (10-year cyclically adjusted P/E ratio) |
+
+To ensure consistency in long-term comparisons, the project converts the original dataset into a **yearly dataset**.
 
 ---
 
-## 📊 Key Analytical Insights
+# Analysis Pipeline
 
-### 🔹 Historical Growth (1950–2023)
-- S&P 500 showed **consistent long-term growth**, with notable increases during **1980s, 1990s, and 2010s**.
-- **Average P/E ratio** trended upward, reflecting stronger investor confidence.
-- Market contractions aligned with **inflation spikes** (1970s oil crisis, 2008 recession).
+Instead of performing isolated queries, the project follows a **structured analytical pipeline** that progressively transforms raw data into investment insights.
 
-### 🔹 Correlation Findings
-| Variable Pair | Correlation (r) | Interpretation |
-|----------------|------------------|----------------|
-| Price ↔ Earnings | **0.910** | Very strong positive correlation |
-| Price ↔ CPI | **0.871** | Inflation-sensitive growth |
-| Earnings ↔ CPI | **0.840** | Growth partly inflation-driven |
-
-### 🔹 Inflation & Market Cycles
-- Markets **outperformed inflation** during most of the 1990s and post-2010s.
-- **Negative cycles** appeared during high inflation decades (1970s & 2020s).
+The pipeline consists of **15 analytical stages**.
 
 ---
 
-## 🔮 Forecast (2024–2030)
+# 1. Data Inspection
 
-| Year | Forecast Real Price |
-|------|----------------------|
-| 2024 | 2873.80 |
-| 2025 | 2915.42 |
-| 2026 | 2957.04 |
-| 2027 | 2998.66 |
-| 2028 | 3040.28 |
-| 2029 | 3081.90 |
-| 2030 | 3123.52 |
+The first stage examines the dataset structure and ensures that historical observations are ordered correctly.
 
-📌 **Interpretation:**  
-According to the linear regression model, the **S&P 500’s real value** is projected to **grow steadily through 2030**, supported by positive slope and high R², indicating strong model reliability.
+This step verifies:
+
+• chronological consistency
+• dataset coverage
+• historical completeness
+
+The dataset is inspected using SQL queries sorted by time.
 
 ---
 
-## ⚙️ Technical Stack
+# 2. Data Cleaning
 
-| Component | Tool |
-|------------|------|
-| Database | **PostgreSQL 16+** |
-| Query Language | **SQL (CTE, Window Functions, Regression, Correlation)** |
-| Visualization | (Optional) Power BI / Tableau |
-| Data Source | Historical S&P 500 dataset (inflation-adjusted) |
+Financial historical datasets often contain missing or incomplete observations.
 
----
+During this step we identify:
 
-## 🧩 Key Analytical Functions Used
-- `AVG()`, `ROUND()`, `LAG()`, `CASE`
-- `REGR_SLOPE()`, `REGR_INTERCEPT()`, `REGR_R2()`
-- `CORR()` — Statistical correlation
-- `generate_series()` — Forecast year generator
+• missing values
+• incomplete rows
+• column inconsistencies
+
+Ensuring clean data is essential before performing financial calculations.
 
 ---
 
-## 🏁 Conclusion
-This project demonstrates a **complete data analytics pipeline** — from **data cleaning and financial modeling** to **statistical forecasting**.  
-It highlights how **SQL alone** can be used for deep financial market analysis, combining **economic insight with quantitative rigor**.
+# 3. Annual Dataset Creation
+
+The original dataset may contain multiple observations within a year.
+
+To standardize analysis, the project creates a **yearly dataset** where each year contains the most recent available observation.
+
+This allows consistent long-term comparisons from **1871 to 2023**.
 
 ---
 
-## 🧑‍💻 Author
-**Muhiddin Axmadov**  
-_Data Analyst | Financial Data Researcher_  
-📍 Focus: Data Analytics • SQL • Market Forecasting • Investment Insight  
+# 4. Annual Market Returns
+
+Annual return measures how much the market increased or decreased compared with the previous year.
+
+Formula:
+
+```
+Return = (Price_t / Price_t-1) - 1
+```
+
+This step allows identification of:
+
+• high growth years
+• negative years
+• market crash periods
+
+---
+
+# 5. Real (Inflation-Adjusted) Returns
+
+Nominal returns do not account for inflation.
+
+To measure the **real economic return**, the analysis calculates returns using **inflation-adjusted prices**.
+
+This provides a more accurate view of investor purchasing power over time.
+
+---
+
+# 6. Dividend Yield Analysis
+
+Dividend yield represents the income generated by equities relative to price.
+
+Formula:
+
+```
+Dividend Yield = Dividend / Price
+```
+
+Historically, dividends have contributed a large portion of total market returns.
+
+This step examines how dividend income evolved over the past century.
+
+---
+
+# 7. Earnings Yield Analysis
+
+Earnings yield is the inverse of the P/E ratio.
+
+```
+Earnings Yield = Earnings / Price
+```
+
+This metric provides insight into the relationship between market valuation and profitability.
+
+---
+
+# 8. Market Drawdown Analysis
+
+Drawdown measures the decline from the historical peak.
+
+```
+Drawdown = Price / Peak - 1
+```
+
+This step identifies:
+
+• market crashes
+• severe corrections
+• recovery periods
+
+Drawdown analysis helps understand market risk and recovery dynamics.
+
+---
+
+# 9. Market Cycles
+
+Using peak and drawdown calculations, the project identifies **market cycles**, including:
+
+• expansion periods
+• correction phases
+• recovery stages
+
+These cycles are essential for understanding long-term market structure.
+
+---
+
+# 10. Financial Crisis Detection
+
+Market returns are classified into categories:
+
+| Condition     | Threshold     |
+| ------------- | ------------- |
+| Crash         | return < -30% |
+| Bear Market   | return < -15% |
+| Normal Market | return ≥ -15% |
+
+This classification highlights major crisis periods in market history.
+
+---
+
+# 11. War Impact Analysis
+
+Major geopolitical events significantly influence financial markets.
+
+The project examines market behavior during:
+
+• World War I (1914–1918)
+• World War II (1939–1945)
+
+Key variables analyzed include:
+
+• index level
+• valuation (PE10)
+• interest rates
+
+---
+
+# 12. Interest Rate Impact
+
+Interest rates strongly influence equity markets.
+
+This step explores the relationship between:
+
+• long-term interest rates
+• annual stock market returns
+
+Historically, falling interest rates often coincide with strong equity growth.
+
+---
+
+# 13. Market Valuation (Shiller PE10)
+
+The **Shiller PE10 ratio** measures market valuation relative to 10-year average earnings.
+
+Markets are classified as:
+
+| PE10  | Valuation   |
+| ----- | ----------- |
+| < 15  | Undervalued |
+| 15–25 | Fair Value  |
+| > 25  | Overvalued  |
+
+This helps identify historically expensive or cheap market conditions.
+
+---
+
+# 14. Decade Performance Analysis
+
+Market performance is aggregated by **decade** to understand long-term economic cycles.
+
+This reveals structural trends such as:
+
+• high-growth decades
+• stagnation periods
+• crisis decades
+
+---
+
+# 15. Final Analytical Dataset
+
+The final step combines all calculated metrics into a unified analytical view.
+
+The final dataset contains:
+
+• yearly returns
+• dividend yield
+• earnings yield
+• valuation metrics
+• macroeconomic variables
+
+This dataset can be used for further analysis or visualization.
+
+---
+
+# Key Analytical Focus
+
+The project aims to answer several long-term financial questions:
+
+• How often do major market crashes occur?
+• How long do recoveries typically take?
+• How do valuations affect future returns?
+• What role do dividends play in total returns?
+• How do interest rates influence equity markets?
+
+---
+
+# Technologies Used
+
+* SQL (PostgreSQL style queries)
+* Financial historical datasets
+* Long-term market analysis techniques
+
+---
+
+# Conclusion
+
+This project demonstrates how structured data analysis can be applied to **long-term financial market research**.
+
+By combining historical financial data with systematic SQL analysis, the project reveals patterns in:
+
+• market cycles
+• valuation regimes
+• economic shocks
+• long-term investment behavior
+
+The approach highlights the importance of **clean data, structured analysis pipelines, and long-term perspectives** when studying financial markets.
+
+
+##  Author
+**Muhiddin Axmadov**   
+ Data Analytics | Investment Insight | Financial Data Researcher
