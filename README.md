@@ -75,7 +75,7 @@ To ensure consistency in long-term comparisons, the project converts the origina
 
 Instead of performing isolated queries, the project follows a **structured analytical pipeline** that progressively transforms raw data into investment insights.
 
-The pipeline consists of **15 analytical stages**.
+The pipeline consists of **14 analytical stages**.
 
 ---
 
